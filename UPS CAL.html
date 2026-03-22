@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPS Backup Calculator - Mojahid Tech</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #004aad;
+            --secondary: #00c6ff;
+            --dark: #1a1a1a;
+            --light: #f4f7f6;
+            --success: #28a745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            margin: 0;
+            color: var(--dark);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px;
+            border-radius: 15px 15px 0 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; }
+        .header p { margin: 5px 0 0; opacity: 0.9; }
+
+        .client-info, .calculator-box {
+            background: white;
+            padding: 25px;
+            margin-top: -10px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .calc-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            width: 100%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .calc-btn:hover { background: #003580; }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #e7f3ff;
+            border-left: 5px solid var(--primary);
+            display: none;
+        }
+
+        .result-item {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .engineer-badge {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 10px;
+        }
+
+        .whatsapp-link {
+            color: #25D366;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        @media print {
+            .tabs, .calc-btn { display: none; }
+            body { background: white; }
+            .container { margin: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-bolt"></i> UPS Backup Calculator</h1>
+        <p>Professional Engineering Sizing Tool</p>
+    </div>
+
+    <!-- Client & Project Details -->
+    <div class="client-info">
+        <h3 style="margin-top:0; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 5px;">
+            <i class="fas fa-file-invoice"></i> Project Details
+        </h3>
+        <div class="grid">
+            <div class="input-group">
+                <label>Client Name</label>
+                <input type="text" id="clientName" placeholder="Enter Client Name">
+            </div>
+            <div class="input-group">
+                <label>Contact Number</label>
+                <input type="text" id="clientPhone" placeholder="Enter Phone No.">
+            </div>
+            <div class="input-group">
+                <label>Project Name</label>
+                <input type="text" id="projectName" placeholder="Enter Project Name">
+            </div>
+            <div class="input-group">
+                <label>Location</label>
+                <input type="text" id="location" placeholder="Site Location">
+            </div>
+            <div class="input-group">
+                <label>Design Engineer</label>
+                <input type="text" id="engineerName" value="Mojahid Tech Engineer">
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator Tabs -->
+    <div class="calculator-box">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('req')">Find Requirements</div>
+            <div class="tab" onclick="switchTab('time')">Find Backup Time</div>
+        </div>
+
+        <!-- Mode 1: Requirements -->
+        <div id="reqMode">
+            <div class="grid">
+                <div class="input-group">
+                    <label>Total Load (Watts)</label>
+                    <input type="number" id="reqLoad" placeholder="e.g. 500">
+                </div>
+                <div class="input-group">
+                    <label>Required Backup (Hours)</label>
+                    <input type="number" id="reqHours" placeholder="e.g. 2">
+                </div>
+                <div class="input-group">
+                    <label>System Voltage (DC Volts)</label>
+                    <select id="reqVolts">
+                        <option value="12">12V (1 Battery)</option>
+                        <option value="24">24V (2 Batteries)</option>
+                        <option value="48">48V (4 Batteries)</option>
+                        <option value="96">96V (8 Batteries)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="calc-btn" onclick="calculateReq()">Calculate Requirement</button>
+        </div>
+
+        <!-- Mode 2: Backup Time -->
+        <div id="timeMode" style="display: none;">
+            <div class="grid">
+                <div class="input-group">
+                    <label>Battery Capacity (Ah)</label>
+                    <input type="number" id="specAh" placeholder="e.g. 150">
+                </div>
+                <div class="input-group">
+                    <label>System Voltage (DC Volts)</label>
+                    <input type="number" id="specVolts" value="12">
+                </div>
+                <div class="input-group">
+                    <label>Current Load (Watts)</label>
+                    <input type="number" id="specLoad" placeholder="e.g. 300">
+                </div>
+            </div>
+            <button class="calc-btn" onclick="calculateTime()">Calculate Backup Time</button>
+        </div>
+
+        <div id="result" class="result-box">
+            <!-- Results injected here -->
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="engineer-badge">
+            <p><strong>Generated By:</strong> <span style="color: var(--primary);">Mojahid Tech Engineer</span></p>
+            <p><i class="fab fa-whatsapp"></i> <strong>WhatsApp:</strong> 
+                <a href="https://wa.me/8801700000000" class="whatsapp-link">+880 1700-000000</a>
+            </p>
+            <button onclick="window.print()" style="margin-top:10px; cursor:pointer; padding:5px 10px;">Download Report (PDF)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchTab(mode) {
+        const tabs = document.querySelectorAll('.tab');
+        const reqMode = document.getElementById('reqMode');
+        const timeMode = document.getElementById('timeMode');
+        
+        if(mode === 'req') {
+            tabs[0].classList.add('active');
+            tabs[1].classList.remove('active');
+            reqMode.style.display = 'block';
+            timeMode.style.display = 'none';
+        } else {
+            tabs[1].classList.add('active');
+            tabs[0].classList.remove('active');
+            reqMode.style.display = 'none';
+            timeMode.style.display = 'block';
+        }
+        document.getElementById('result').style.display = 'none';
+    }
+
+    const efficiency = 0.85; // Standard UPS efficiency
+    const pf = 0.8;         // Power Factor
+
+    function calculateReq() {
+        const load = parseFloat(document.getElementById('reqLoad').value);
+        const hours = parseFloat(document.getElementById('reqHours').value);
+        const volts = parseFloat(document.getElementById('reqVolts').value);
+
+        if(!load || !hours) { alert("Please enter load and hours"); return; }
+
+        // 1. Required UPS Power (VA) with 25% safety margin
+        const upsVA = (load / pf) * 1.25;
+        
+        // 2. Required Ah = (Watts * Hours) / (Volts * Efficiency)
+        const reqAh = (load * hours) / (volts * efficiency);
+
+        showResult(`
+            <div class="result-item">Suggested UPS Rating: <span class="result-value">${Math.round(upsVA)} VA</span></div>
+            <div class="result-item">Required Battery Capacity: <span class="result-value">${reqAh.toFixed(1)} Ah</span></div>
+            <div class="result-item">System Configuration: <span class="result-value">${volts}V System</span></div>
+            <small>*Calculated with 85% efficiency and 0.8 Power Factor</small>
+        `);
+    }
+
+    function calculateTime() {
+        const ah = parseFloat(document.getElementById('specAh').value);
+        const volts = parseFloat(document.getElementById('specVolts').value);
+        const load = parseFloat(document.getElementById('specLoad').value);
+
+        if(!ah || !volts || !load) { alert("Please enter all technical details"); return; }
+
+        // Backup Time (Hrs) = (Ah * Volts * Efficiency) / Load
+        const backupHrs = (ah * volts * efficiency) / load;
+        const totalMinutes = backupHrs * 60;
+        const h = Math.floor(backupHrs);
+        const m = Math.round((backupHrs - h) * 60);
+
+        showResult(`
+            <div class="result-item">Estimated Backup Time: <span class="result-value">${h} Hours and ${m} Minutes</span></div>
+            <div class="result-item">Total in Minutes: <span class="result-value">${Math.round(totalMinutes)} mins</span></div>
+            <div class="result-item">Battery Energy: <span class="result-value">${(ah * volts)} Wh</span></div>
+        `);
+    }
+
+    function showResult(html) {
+        const resBox = document.getElementById('result');
+        resBox.innerHTML = `<h3 style="margin-top:0">Calculation Summary</h3>` + html;
+        resBox.style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
